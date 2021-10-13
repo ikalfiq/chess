@@ -39,10 +39,11 @@ if __name__ == "__main__":
 
     rook_ = Rook(pygame.image.load('jpg_pieces/black/1.jpg'))
 
-    while True:
+    while (True):
 
         # Draw the board
         pygame.draw.rect(Display, board_information["brown_square"], (0,0,640,640))
+
         for x in range(0, 8, 2):
             for y in range(0, 8, 1):
                 blue_x_topleft = (x+(y%2))*square_size
@@ -50,42 +51,57 @@ if __name__ == "__main__":
 
                 pygame.draw.rect(Display, board_information["blue_square"], (blue_x_topleft, blue_y_topleft, square_size, square_size)) 
 
+
         state = board_setup.get_state()
+
         index1, index2 = rook_.get_indices()
-        rook_.update_indices(state, index1, index2)
-        coordinates = board_setup.set_blit_coordinates(state, index1, index2)
-        print(coordinates)
+
         if (state):
-            x_blit1, x_blit2, y_blit1, y_blit2 = coordinates[0], coordinates[1], coordinates[2], coordinates[3]
-            test1, test2, test3 = 10, 570, 10
-            rook_.set_object(Display.blit(rook_.get_image(), (x_blit1, y_blit1)))
-            print(x_blit2)
-            rook_.set_object(Display.blit(rook_.get_image(), (x_blit2, y_blit2)))
-            #rook_.set_object(Display.blit(rook_.get_image(), (test1, test3)))
-            #rook_.set_object(Display.blit(rook_.get_image(), (test2, test3)))
+            rook_.update_indices(state, index1, index2)
+
+        left_coordinates, right_coordinates, left, right = board_setup.set_blit_coordinates(state, rook_.left_flag, rook_.right_flag, index1, index2)
+
+
+        if (state):
+            x_blit1, y_blit1 = left_coordinates[0], left_coordinates[1]
+            x_blit2, y_blit2 = right_coordinates[0], right_coordinates[1]
+            rook_.set_object(Display.blit(rook_.get_image(), (x_blit1, y_blit1)), rook_.left_flag, rook_.right_flag)
+            rook_.set_object(Display.blit(rook_.get_image(), (x_blit2, y_blit2)), rook_.left_flag, rook_.right_flag)
 
         else:
-            x_blit1, y_blit1, x_blit2, y_blit2 = coordinates[0], coordinates[1], coordinates[2], coordinates[3]
-            Display.blit(rook_.get_image() ,(x_blit1, y_blit1))
-            Display.blit(rook_.get_image(), (x_blit2, y_blit2))
+            x_blit1, y_blit1 = left_coordinates[0], left_coordinates[1]
+            x_blit2, y_blit2 = right_coordinates[0], right_coordinates[1]
+            rook_.set_object(Display.blit(rook_.get_image() ,(x_blit1, y_blit1)), rook_.left_flag, rook_.right_flag)
+            rook_.set_object(Display.blit(rook_.get_image(), (x_blit2, y_blit2)), rook_.left_flag, rook_.right_flag)
+
+        # Reset once everything done
+        if (state == False):
+            rook_.left_flag, rook_.right_flag  = left, right 
 
         rook = rook_.get_object()
-        #print(rook[0].center, rook[1].center)
 
         events = pygame.event.get()
         for event in events:
             if (event.type == pygame.MOUSEBUTTONDOWN):
-                #if (rook_.get_object().collidepoint(event.pos)):
+                if (rook[0].collidepoint(event.pos)):
+                    print("Left Rook")
+                    rook_.left_flag = True
+
+                elif (rook[1].collidepoint(event.pos)):
+                    print("Right Rook")
+                    rook_.right_flag = True
                     x,y = event.pos[0], event.pos[1]
-                    index1, index2 = board_setup.check_zone(x,y)
-                    print(index1, index2)
+
+                print(rook_.left_flag, rook_.right_flag)
+
+                index1, index2 = board_setup.check_zone(x,y)
+
             if (event.type == pygame.MOUSEBUTTONUP):
                 x,y = event.pos[0], event.pos[1]
                 index1, index2 = board_setup.check_zone(x,y)
                 state = False
                 board_setup.set_state(state)
                 rook_.update_indices(state, index1, index2)
-                print(index1, index2)
        
 
         pygame.display.update()

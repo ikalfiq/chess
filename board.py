@@ -9,6 +9,8 @@ class Board:
         self.square_size = 80
         self.horizontal = []
         self.vertical = []
+        self.left_blit_coordinates = []
+        self.right_blit_coordinates = []
 
         self.default_state = True
 
@@ -68,22 +70,39 @@ class Board:
                 vertical_key = index+1
                 break
 
-        print(self.horizontal_names[horizontal_key], self.vertical_names[vertical_key])
+        self.square = self.horizontal_names[horizontal_key] + self.vertical_names[vertical_key]
+        print(self.square)
         return horizontal_key-1, vertical_key-1
 
-    def set_blit_coordinates(self, flag, index1, index2):
+    def set_blit_coordinates(self, flag, left, right, index1, index2):
         offset = 10
         if (flag):
-            x_blit1, x_blit2 = self.horizontal[index1]+offset, self.horizontal[index2]+offset
-            y_blit1, y_blit2 = self.vertical[index1]+offset, self.vertical[index1]+offset
+            if (len(self.left_blit_coordinates) < 2):
+                self.left_blit_coordinates.append(self.horizontal[index1] + offset)
+                self.left_blit_coordinates.append(self.vertical[index1] + offset)
 
-            return [x_blit1, x_blit2, y_blit1, y_blit2]
+            if (len(self.right_blit_coordinates) < 2):
+                self.right_blit_coordinates.append(self.horizontal[index2] + offset)
+                self.right_blit_coordinates.append(self.vertical[index1] + offset)
+
 
         else:
-            x_blit1, x_blit2 = self.horizontal[index1]+offset, self.horizontal[index2]+offset
-            y_blit1, y_blit2 = self.vertical[index1]+offset, self.vertical[index2]+offset
+            if (left):
+                # Update left piece coordinates
+                self.left_blit_coordinates[0] = self.horizontal[index1] + offset
+                self.left_blit_coordinates[1] = self.vertical[index2] + offset
 
-            return [x_blit1, y_blit1, x_blit2, y_blit2]
+                left = False
+
+            if (right):
+                # Update right piece coordinates
+                self.right_blit_coordinates[0] = self.horizontal[index1] + offset
+                self.right_blit_coordinates[1] = self.vertical[index2] + offset
+
+                right = False
+
+        return self.left_blit_coordinates, self.right_blit_coordinates, left, right
+
 
     def get_parameters(self):
         return{"brown_square":self.brown_square, "blue_square": self.blue_square, "square_size": self.square_size} 
