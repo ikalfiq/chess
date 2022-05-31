@@ -1,5 +1,5 @@
 # chess
-chess
+Chess
 
 Issues
 - Rooks can only move once

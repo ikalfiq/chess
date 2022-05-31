@@ -52,14 +52,12 @@ class Pawn:
     def check_obstacles(self, x, y, color, obstacles_list, square_size, capture_flag):
         square_travel = []
         y_factor = int(abs(y - self.y)/ square_size)
-        print(y_factor)
         
         for i in range(y_factor):
             if color == 'black':
                 square_travel.append((self.x, self.y + (i+1) * square_size))
             else:
                 square_travel.append((self.x, self.y - (i+1) * square_size))
-        print(square_travel)
 
         for i in range(len(square_travel)):
             for j in range(len(obstacles_list)):
@@ -69,23 +67,21 @@ class Pawn:
 
         return False
 
-    # If opponent piece if directly in front, pawn is blocked
-    def check_capture_condition(self, x, y, color, position, square_size, capture_flag):
-        if capture_flag:
-            if color == 'black':
-                if x == self.x + square_size and y == self.y + square_size:
+    # If opponent piece is directly in front, pawn is blocked
+    def check_capture_condition(self, x, y, color, position, square_size):
+        if color == 'black':
+            if x == self.x + square_size and y == self.y + square_size:
                     return True
-                if x == self.x - square_size and y == self.y + square_size:
-                    return True
-
-            if color == 'white':
-                if x == self.x + square_size and y == self.y - square_size:
-                    return True
-                if x == self.x - square_size and y == self.y - square_size:
+            if x == self.x - square_size and y == self.y + square_size:
                     return True
 
-        else:
-            return False
+        if color == 'white':
+            if x == self.x + square_size and y == self.y - square_size:
+                    return True
+            if x == self.x - square_size and y == self.y - square_size:
+                    return True
+
+        return False
             
     def check_constraints(self, x, y, color, position, obstacle_list, square_size, capture_flag):
         obstacle_flag = False
@@ -93,43 +89,38 @@ class Pawn:
         passed_constraint = False
         x_constraint = abs(x - self.x)
 
-        print (x_constraint) 
         if x_constraint == 0 or capture_flag:
             if color == 'black':
                 # Legal move
                 if self.black_start_flags[position - 1]:
                     if y <= self.y + (2 * square_size):
                         self.black_start_flags[position - 1] = False
-                        #self.x, self.y = x, y
                         passed_constraint = True
                     else:
-                        print("Invalid move")
+                        pass
                 
                 else:
                     if y == self.y + square_size:
-                        #self.x, self.y = x, y
                         passed_constraint = True
 
                     else:
-                        print("Invalid move")
+                        pass
 
             if color == 'white':
                 if self.white_start_flags[position - 1]:
                     if y >= self.y - (2 * square_size):
                         self.white_start_flags[position - 1] = False
-                        #self.x, self.y = x, y
                         passed_constraint = True
 
                     else:
-                        print("Invalid move")
+                        pass
 
                 else:
                     if y == self.y - square_size:
-                        #self.x, self.y = x, y
                         passed_constraint = True
 
                     else:
-                        print("Invalid move")
+                        pass
         else:
             return
 
@@ -138,3 +129,4 @@ class Pawn:
             
             if not obstacle_flag:
                 self.x, self.y = x, y
+                return True

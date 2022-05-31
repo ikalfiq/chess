@@ -57,7 +57,7 @@ def init_pieces():
 if __name__== '__main__':
     pygame.init()
 
-    width, height = 640, 640
+    width, height = 1000, 640
 
     Display = pygame.display.set_mode((width, height))
     board_surface = pygame.Surface((10,10))
@@ -73,8 +73,14 @@ if __name__== '__main__':
     collision_flag = False
     capture_flag = False
 
+    white_capture_counter1 = 0
+    black_capture_counter1 = 0
+    white_capture_counter2 = 0
+    black_capture_counter2 = 0
+
     while (True):            
-        pygame.draw.rect(Display, board_layout.brown_square, (0, 0, width, height))
+        pygame.draw.rect(Display, (40,20,20), (0, 0, width, height))
+        pygame.draw.rect(Display, board_layout.brown_square, (0, 0, 640, 640))
 
         for x in range(0, 8, 2):
             for y in range(0, 8, 1):
@@ -84,9 +90,16 @@ if __name__== '__main__':
 
         objects = []
         obstacles = []
+        king_positions = []
 
         for piece in pieces:
-            obstacles.append((piece.x, piece.y))
+            if piece.name == 'black king':
+                board_layout.black_king_pos = ((piece.x, piece.y))
+            
+            if piece.name == 'white king':
+                board_layout.white_king_pos = ((piece.x, piece.y))
+            else:
+                obstacles.append((piece.x, piece.y))
             objects.append(Display.blit(piece.image, (piece.x, piece.y)))
     
         for event in pygame.event.get():
@@ -96,8 +109,13 @@ if __name__== '__main__':
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(len(objects)):
                         if objects[i].collidepoint(event.pos):
-                            move_flag = True     
-                            track_id = i    
+                            if pieces[i].color == 'white' and board_layout.white_track:
+                                move_flag = True     
+                                track_id = i    
+
+                            if pieces[i].color == 'black' and not board_layout.white_track:
+                                move_flag = True     
+                                track_id = i 
 
             if move_flag:
                 if event.type == pygame.MOUSEBUTTONUP:
@@ -108,19 +126,45 @@ if __name__== '__main__':
                                 collision_flag = True
 
                             else:
+                                capture_id = i
                                 capture_flag = True
                                 print("If this is a valid move, you can capture.")
+                                
 
                     if not collision_flag:
                         piece = pieces[track_id]
                         x, y = board_layout.check_location(event.pos[0], event.pos[1])
 
                         if piece.name == 'black pawn' or piece.name == 'white pawn':
-                            capture_flag = piece.check_capture_condition(x, y, piece.color, piece.position, square_size, capture_flag)
-                            piece.check_constraints(x, y, piece.color, piece.position, obstacles, square_size, capture_flag)
-                        
+                            capture_flag = piece.check_capture_condition(x, y, piece.color, piece.position, square_size)
+                            if (x,y) != (piece.x, piece.y):
+                                board_layout.white_track = not board_layout.white_track
+                            update_move = piece.check_constraints(x, y, piece.color, piece.position, obstacles, square_size, capture_flag)
+                            
                         else:
-                            piece.check_constraints(x, y, obstacles, board_layout.square_size, capture_flag)
+                            if (x,y) != (piece.x, piece.y):
+                                board_layout.white_track = not board_layout.white_track
+
+                            update_move = piece.check_constraints(x, y, piece.color, obstacles, board_layout.square_size, board_layout.black_king_pos, board_layout.white_king_pos)
+                        
+                    if capture_flag and update_move:
+                        print("Move captured opponent's piece")
+                        if pieces[capture_id].color == 'black':
+                            if pieces[capture_id].name == 'black pawn':
+                                pieces[capture_id].x, pieces[capture_id].y = 650 + black_capture_counter1 * 40, 570
+                                black_capture_counter1 += 1
+                            else:
+                                pieces[capture_id].x, pieces[capture_id].y = 650 + black_capture_counter2 * 40, 490
+                                black_capture_counter2 += 1    
+
+                        else:
+                            if pieces[capture_id].name == 'white pawn':
+                                pieces[capture_id].x, pieces[capture_id].y = 650 + white_capture_counter1 * 40, 10                          
+                                white_capture_counter1 += 1
+                            else:
+                                pieces[capture_id].x, pieces[capture_id].y = 650 + white_capture_counter2 * 40, 90
+                                white_capture_counter2 += 1
+
                     move_flag = False
                     collision_flag = False
                     capture_flag = False

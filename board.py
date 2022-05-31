@@ -5,6 +5,9 @@ class Board:
         self.square_size = 80
         self.brown_square = (100, 50, 50)
         self.blue_square = (0, 0, 100)
+        self.white_track = True
+        self.black_king_pos = 0
+        self.white_king_pos = 0
 
         self.horizontal = []
         self.vertical = []
